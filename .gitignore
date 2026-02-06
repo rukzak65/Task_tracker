@@ -1,0 +1,22 @@
+# Global ignores
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+*.log
+*.env
+.env
+.DS_Store
+
+# Backend Python venv
+backend/venv/
+
+# Frontend node_modules
+frontend/node_modules/
+
+# VSCode settings
+.vscode/
+PLAN.md
+backend/BACKEND_PLAN.md
