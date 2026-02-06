@@ -1,1 +1,9 @@
 # Python dependencies for backend
+fastapi==0.110.0
+uvicorn==0.27.0
+sqlalchemy==2.0.25
+pydantic==2.5.3
+python-jose==3.3.0
+passlib[bcrypt]==1.7.4
+pytest==7.4.4
+# sqlite3 — стандартная библиотека, не требуется установка
