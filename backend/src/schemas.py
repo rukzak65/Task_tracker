@@ -1,6 +1,6 @@
 # Pydantic-схемы
 from pydantic import BaseModel, EmailStr
-from typing import Optional, List
+from typing import Optional
 from datetime import datetime
 
 # Токен
@@ -31,7 +31,7 @@ class User(UserBase):
 class HabitBase(BaseModel):
     name: str
     description: Optional[str] = None
-    frequency: List[int]  # Список дней недели (0-6)
+    frequency: list[int]  # Список дней недели (0-6)
 
 class HabitCreate(HabitBase):
     pass
