@@ -2,6 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
+from database import get_db
 from utils import verify_token
 from .. import db_crud as crud, schemas, models
 
@@ -19,4 +20,6 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
         raise HTTPException(status_code=401, detail="User not found")
     return user
 
-
+@router.get("/{habit_id}", response_model=list[schemas.HabitCompletion])
+def read_completions(habit_id: int, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)): 
+    return crud.get_completions_by_habit(db, habit_id)
