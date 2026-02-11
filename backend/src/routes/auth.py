@@ -1,8 +1,7 @@
 # Регистрация и логин
-from schemas import UserCreate, UserLogin
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from database import get_db
+from ..database import get_db
 from .. import db_crud as crud, schemas, utils
 
 router = APIRouter()
