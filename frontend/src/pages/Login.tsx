@@ -1,12 +1,20 @@
 import React, { useState } from 'react';
+import AuthService from '../services/auth';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login attempt:', { email, password });
+    try {
+      await AuthService.login({ email, password });
+      setError('');
+      console.log('Login successful');
+    } catch (err) {
+      setError('Invalid credentials');
+    }
   };
 
   return (
@@ -31,6 +39,7 @@ const Login: React.FC = () => {
             required
           />
         </div>
+        {error && <p style={{ color: 'red' }}>{error}</p>}
         <button type="submit">Login</button>
       </form>
     </div>
