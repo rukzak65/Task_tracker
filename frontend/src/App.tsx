@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Login from './pages/Login';
 
 const App: React.FC = () => {
   return (
@@ -11,6 +12,7 @@ const App: React.FC = () => {
             <p>Hello World!</p>
           </div>
         } />
+        <Route path="/login" element={<Login />} />
       </Routes>
     </Router>
   );
