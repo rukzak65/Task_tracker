@@ -12,7 +12,7 @@ const Login: React.FC = () => {
       await AuthService.login({ email, password });
       setError('');
       console.log('Login successful');
-    } catch (err) {
+    } catch {
       setError('Invalid credentials');
     }
   };
