@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Login from './pages/Login';
 
 const App: React.FC = () => {
@@ -10,6 +10,7 @@ const App: React.FC = () => {
           <div>
             <h1>Habit Tracker</h1>
             <p>Hello World!</p>
+            <Link to="/login">Go to Login</Link>
           </div>
         } />
         <Route path="/login" element={<Login />} />
