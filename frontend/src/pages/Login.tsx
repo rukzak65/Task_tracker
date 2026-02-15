@@ -4,10 +4,15 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Login attempt:', { email, password });
+  };
+
   return (
     <div>
       <h2>Login</h2>
-      <form>
+      <form onSubmit={handleSubmit}>
         <div>
           <label>Email:</label>
           <input
