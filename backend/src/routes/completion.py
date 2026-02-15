@@ -21,5 +21,28 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
     return user
 
 @router.get("/{habit_id}", response_model=list[schemas.HabitCompletion])
-def read_completions(habit_id: int, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)): 
+def read_completions(habit_id: int, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    habit = crud.get_habit(db, habit_id)
+    if habit is None or habit.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Habit not found")
     return crud.get_completions_by_habit(db, habit_id)
+
+
+@router.post("/", response_model=schemas.HabitCompletion)
+def create_completion(completion: schemas.HabitCompletionCreate, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    habit = crud.get_habit(db, completion.habit_id)
+    if habit is None or habit.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Habit not found")
+    return crud.create_completion(db, completion)
+
+@router.delete("/{completion_id}")
+def delete_completion(completion_id: int, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    completion = db.query(models.HabitCompletion).filter(models.HabitCompletion.id == completion_id).first()
+    if completion is None:
+        raise HTTPException(status_code=404, detail="Completion not found")
+    habit = crud.get_habit(db, completion.habit_id)
+    if habit.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    crud.delete_completion(db, completion_id)
+    return {"message": "Completion deleted"}
+    
