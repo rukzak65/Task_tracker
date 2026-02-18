@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = 'http://127.0.0.1:8000';
 
 interface LoginData {
   email: string;
@@ -13,12 +14,20 @@ interface RegisterData {
   password: string;
 }
 
+interface DecodedToken {
+  userId: string;
+  email: string;
+  exp: number;
+}
+
 class AuthService {
+  private tokenKey = 'authToken';
+
   async login(data: LoginData): Promise<void> {
     try {
       const response = await axios.post(`${API_BASE_URL}/auth/login`, data);
       const { token } = response.data;
-      localStorage.setItem('authToken', token);
+      localStorage.setItem(this.tokenKey, token);
     } catch {
       throw new Error('Login failed');
     }
@@ -28,9 +37,42 @@ class AuthService {
     try {
       const response = await axios.post(`${API_BASE_URL}/auth/register`, data);
       const { token } = response.data;
-      localStorage.setItem('authToken', token);
+      localStorage.setItem(this.tokenKey, token);
     } catch {
       throw new Error('Registration failed');
+    }
+  }
+
+  logout(): void {
+    localStorage.removeItem(this.tokenKey);
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem(this.tokenKey);
+  }
+
+  isAuthenticated(): boolean {
+    const token = this.getToken();
+    if (!token) return false;
+
+    try {
+      const decoded: DecodedToken = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+      return decoded.exp > currentTime;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  getUserId(): string | null {
+    const token = this.getToken();
+    if (!token) return null;
+
+    try {
+      const decoded: DecodedToken = jwtDecode(token);
+      return decoded.userId;
+    } catch (error) {
+      return null;
     }
   }
 }
