@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import AuthService from '../services/auth';
 
 const Login: React.FC = () => {
@@ -42,6 +43,7 @@ const Login: React.FC = () => {
         {error && <p style={{ color: 'red' }}>{error}</p>}
         <button type="submit">Login</button>
       </form>
+      <p>Don't have an account? <Link to="/register">Register</Link></p>
     </div>
   );
 };
