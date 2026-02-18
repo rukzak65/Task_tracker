@@ -5,14 +5,15 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
 
 export interface Habit {
   id: string;
-  name: string;
+  title: string;
+  day_of_week: number;
   userId: string;
   completions: { [date: string]: boolean }; // date in YYYY-MM-DD format
 }
 
 interface CreateHabitData {
-  name: string;
-  frequency: number[]; // e.g., [1] for daily
+  title: string;
+  day_of_week: number; // 0-6 for Monday to Sunday
 }
 
 class HabitsService {

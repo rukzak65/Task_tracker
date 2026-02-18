@@ -11,7 +11,7 @@ const Dashboard: React.FC = () => {
     const loadHabits = async () => {
       try {
         const fetchedHabits = await HabitsService.getHabits();
-        setHabits(fetchedHabits);
+        setHabits(fetchedHabits.map(h => ({ ...h, completions: h.completions || {} })));
       } catch (error) {
         console.error('Failed to load habits:', error);
       }
@@ -29,22 +29,14 @@ const Dashboard: React.FC = () => {
     // Optimistic update
     setHabits(habits.map(h => h.id === habitId ? updatedHabit : h));
 
-    try {
-      await HabitsService.updateHabit(habitId, { completions: newCompletions });
-    } catch (error) {
-      console.error('Failed to update habit:', error);
-      // Revert on error
-      setHabits(habits.map(h => h.id === habitId ? habit : h));
-    }
+    // Note: Completions are local only, no API update needed
   };
 
   const handleAddHabit = async (dayIndex: number) => {
     if (!newHabitNames[dayIndex].trim()) return;
     try {
-      const newHabit = await HabitsService.createHabit({ name: newHabitNames[dayIndex], frequency: [0, 1, 2, 3, 4, 5, 6] });
-      const date = weekDates[dayIndex];
-      const updatedHabit = { ...newHabit, completions: { [date]: true } };
-      await HabitsService.updateHabit(newHabit.id, { completions: { [date]: true } });
+      const newHabit = await HabitsService.createHabit({ title: newHabitNames[dayIndex], day_of_week: dayIndex });
+      const updatedHabit = { ...newHabit, completions: {} };
       setHabits([...habits, updatedHabit]);
       setNewHabitNames(prev => prev.map((name, i) => i === dayIndex ? '' : name));
     } catch (error) {
@@ -100,7 +92,7 @@ const Dashboard: React.FC = () => {
             {habits.length === 0 ? (
               <p>No habits yet</p>
             ) : (
-              habits.map((habit) => (
+              habits.filter(h => h.day_of_week === index).map((habit) => (
                 <div key={habit.id} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <label>
                     <input
@@ -108,7 +100,7 @@ const Dashboard: React.FC = () => {
                       checked={habit.completions[weekDates[index]] || false}
                       onChange={() => handleToggleCompletion(habit.id, weekDates[index])}
                     />
-                    {habit.name}
+                    {habit.title}
                   </label>
                   <button onClick={() => handleDeleteHabit(habit.id)}>Delete</button>
                 </div>

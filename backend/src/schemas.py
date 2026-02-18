@@ -29,9 +29,9 @@ class User(UserBase):
 
 # Схемы для Habit
 class HabitBase(BaseModel):
-    name: str
+    title: str
     description: Optional[str] = None
-    frequency: list[int]  # Список дней недели (0-6)
+    day_of_week: int  # День недели (0-6, где 0=Понедельник)
 
 class HabitCreate(HabitBase):
     pass

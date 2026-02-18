@@ -33,7 +33,7 @@ def create_completion(completion: schemas.HabitCompletionCreate, current_user: m
     habit = crud.get_habit(db, completion.habit_id)
     if habit is None or habit.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="Habit not found")
-    return crud.create_completion(db, completion)
+    return crud.create_completion(db, completion, current_user.id)
 
 @router.delete("/{completion_id}")
 def delete_completion(completion_id: int, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):

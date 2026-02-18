@@ -27,7 +27,12 @@ def get_habits_by_user(db: Session, user_id: int):
     return db.query(models.Habit).filter(models.Habit.user_id == user_id).all()
 
 def create_habit(db: Session, habit: schemas.HabitCreate, user_id: int):
-    db_habit = models.Habit(**habit.dict(), user_id=user_id)
+    db_habit = models.Habit(
+        title=habit.title,
+        description=habit.description,
+        day_of_week=habit.day_of_week,
+        user_id=user_id
+    )
     db.add(db_habit)
     db.commit()
     db.refresh(db_habit)
@@ -39,8 +44,10 @@ def get_habit(db: Session, habit_id: int):
 def update_habit(db: Session, habit_id: int, habit_update: schemas.HabitCreate):
     db_habit = db.query(models.Habit).filter(models.Habit.id == habit_id).first()
     if db_habit:
-        for key, value in habit_update.dict().items():
-            setattr(db_habit, key, value)
+        update_data = habit_update.dict(exclude_unset=True)
+        for key, value in update_data.items():
+            if hasattr(db_habit, key):
+                setattr(db_habit, key, value)
         db.commit()
         db.refresh(db_habit)
     return db_habit
@@ -56,8 +63,12 @@ def delete_habit(db: Session, habit_id: int):
 def get_completions_by_habit(db: Session, habit_id: int):
     return db.query(models.HabitCompletion).filter(models.HabitCompletion.habit_id == habit_id).all()
 
-def create_completion(db: Session, completion: schemas.HabitCompletionCreate):
-    db_completion = models.HabitCompletion(**completion.dict())
+def create_completion(db: Session, completion: schemas.HabitCompletionCreate, user_id: int):
+    db_completion = models.HabitCompletion(
+        habit_id=completion.habit_id,
+        day_of_week=completion.day_of_week,
+        user_id=user_id
+    )
     db.add(db_completion)
     db.commit()
     db.refresh(db_completion)
