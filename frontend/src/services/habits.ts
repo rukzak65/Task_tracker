@@ -12,7 +12,7 @@ export interface Habit {
 
 interface CreateHabitData {
   name: string;
-  frequency: string; // e.g., "daily", "weekly"
+  frequency: number[]; // e.g., [1] for daily
 }
 
 class HabitsService {

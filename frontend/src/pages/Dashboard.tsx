@@ -4,8 +4,7 @@ import HabitsService, { type Habit } from '../services/habits';
 
 const Dashboard: React.FC = () => {
   const { logout } = useAuth();
-  const [newHabitName, setNewHabitName] = useState('');
-  const [newHabitFrequency, setNewHabitFrequency] = useState('daily');
+  const [newHabitNames, setNewHabitNames] = useState<string[]>(['', '', '', '', '', '', '']);
   const [habits, setHabits] = useState<Habit[]>([]);
 
   useEffect(() => {
@@ -39,13 +38,15 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const handleAddHabit = async () => {
-    if (!newHabitName.trim()) return;
+  const handleAddHabit = async (dayIndex: number) => {
+    if (!newHabitNames[dayIndex].trim()) return;
     try {
-      const newHabit = await HabitsService.createHabit({ name: newHabitName, frequency: newHabitFrequency });
-      setHabits([...habits, newHabit]);
-      setNewHabitName('');
-      setNewHabitFrequency('daily');
+      const newHabit = await HabitsService.createHabit({ name: newHabitNames[dayIndex], frequency: [0, 1, 2, 3, 4, 5, 6] });
+      const date = weekDates[dayIndex];
+      const updatedHabit = { ...newHabit, completions: { [date]: true } };
+      await HabitsService.updateHabit(newHabit.id, { completions: { [date]: true } });
+      setHabits([...habits, updatedHabit]);
+      setNewHabitNames(prev => prev.map((name, i) => i === dayIndex ? '' : name));
     } catch (error) {
       console.error('Failed to create habit:', error);
     }
@@ -83,23 +84,19 @@ const Dashboard: React.FC = () => {
     <div>
       <h1>Dashboard - Week View</h1>
       <button onClick={logout}>Logout</button>
-      <div style={{ margin: '20px 0' }}>
-        <input
-          type="text"
-          value={newHabitName}
-          onChange={(e) => setNewHabitName(e.target.value)}
-          placeholder="Enter habit name"
-        />
-        <select value={newHabitFrequency} onChange={(e) => setNewHabitFrequency(e.target.value)}>
-          <option value="daily">Daily</option>
-          <option value="weekly">Weekly</option>
-        </select>
-        <button onClick={handleAddHabit}>Add Habit</button>
-      </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {daysOfWeek.map((day, index) => (
           <div key={day} style={{ border: '1px solid #ccc', padding: '10px' }}>
-            <h3>{day} ({weekDates[index]})</h3>
+            <h3>{day}</h3>
+            <div style={{ margin: '10px 0' }}>
+              <input
+                type="text"
+                value={newHabitNames[index]}
+                onChange={(e) => setNewHabitNames(prev => prev.map((name, i) => i === index ? e.target.value : name))}
+                placeholder="Enter habit name"
+              />
+              <button onClick={() => handleAddHabit(index)}>Add Habit</button>
+            </div>
             {habits.length === 0 ? (
               <p>No habits yet</p>
             ) : (
