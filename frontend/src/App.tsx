@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
+import Dashboard from './pages/Dashboard.tsx';
 import { AuthProvider } from './components/Auth/AuthContext';
 import PrivateRoute from './components/Layout/PrivateRoute';
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AuthService from '../services/auth';
+import { useAuth } from '../components/Auth/AuthContextInstance';
 
 const Register: React.FC = () => {
     const [name, setName] = useState('');
@@ -8,11 +8,12 @@ const Register: React.FC = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const { register } = useAuth();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await AuthService.register({ name, email, password });
+            await register(name, email, password);
             setError('');
             navigate('/dashboard');
         } catch {

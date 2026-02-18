@@ -26,9 +26,9 @@ class AuthService {
   async login(data: LoginData): Promise<void> {
     try {
       const response = await axios.post(`${API_BASE_URL}/auth/login`, data);
-      const { token } = response.data;
-      localStorage.setItem(this.tokenKey, token);
-    } catch {
+      const { access_token } = response.data;
+      localStorage.setItem(this.tokenKey, access_token);
+    } catch (error) {
       throw new Error('Login failed');
     }
   }
@@ -36,8 +36,8 @@ class AuthService {
   async register(data: RegisterData): Promise<void> {
     try {
       const response = await axios.post(`${API_BASE_URL}/auth/register`, data);
-      const { token } = response.data;
-      localStorage.setItem(this.tokenKey, token);
+      const { access_token } = response.data;
+      localStorage.setItem(this.tokenKey, access_token);
     } catch {
       throw new Error('Registration failed');
     }
@@ -59,7 +59,7 @@ class AuthService {
       const decoded: DecodedToken = jwtDecode(token);
       const currentTime = Date.now() / 1000;
       return decoded.exp > currentTime;
-    } catch (error) {
+    } catch {
       return false;
     }
   }
@@ -71,7 +71,7 @@ class AuthService {
     try {
       const decoded: DecodedToken = jwtDecode(token);
       return decoded.userId;
-    } catch (error) {
+    } catch {
       return null;
     }
   }

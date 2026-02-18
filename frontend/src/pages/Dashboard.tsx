@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../components/Auth/AuthContext';
-import HabitsService, { Habit } from '../services/habits';
+import { useAuth } from '../components/Auth/AuthContextInstance';
+import HabitsService, { type Habit } from '../services/habits';
 
 const Dashboard: React.FC = () => {
   const { logout } = useAuth();
   const [newHabitName, setNewHabitName] = useState('');
+  const [newHabitFrequency, setNewHabitFrequency] = useState('daily');
   const [habits, setHabits] = useState<Habit[]>([]);
 
   useEffect(() => {
@@ -36,14 +37,27 @@ const Dashboard: React.FC = () => {
       // Revert on error
       setHabits(habits.map(h => h.id === habitId ? habit : h));
     }
+  };
+
   const handleAddHabit = async () => {
-    if (newHabitName.trim()) {
+    if (!newHabitName.trim()) return;
+    try {
+      const newHabit = await HabitsService.createHabit({ name: newHabitName, frequency: newHabitFrequency });
+      setHabits([...habits, newHabit]);
+      setNewHabitName('');
+      setNewHabitFrequency('daily');
+    } catch (error) {
+      console.error('Failed to create habit:', error);
+    }
+  };
+
+  const handleDeleteHabit = async (habitId: string) => {
+    if (window.confirm('Are you sure you want to delete this habit?')) {
       try {
-        const newHabit = await HabitsService.createHabit({ name: newHabitName });
-        setHabits([...habits, newHabit]);
-        setNewHabitName('');
+        await HabitsService.deleteHabit(habitId);
+        setHabits(habits.filter(h => h.id !== habitId));
       } catch (error) {
-        console.error('Failed to add habit:', error);
+        console.error('Failed to delete habit:', error);
       }
     }
   };
@@ -76,6 +90,10 @@ const Dashboard: React.FC = () => {
           onChange={(e) => setNewHabitName(e.target.value)}
           placeholder="Enter habit name"
         />
+        <select value={newHabitFrequency} onChange={(e) => setNewHabitFrequency(e.target.value)}>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+        </select>
         <button onClick={handleAddHabit}>Add Habit</button>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -86,7 +104,7 @@ const Dashboard: React.FC = () => {
               <p>No habits yet</p>
             ) : (
               habits.map((habit) => (
-                <div key={habit.id}>
+                <div key={habit.id} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <label>
                     <input
                       type="checkbox"
@@ -95,6 +113,7 @@ const Dashboard: React.FC = () => {
                     />
                     {habit.name}
                   </label>
+                  <button onClick={() => handleDeleteHabit(habit.id)}>Delete</button>
                 </div>
               ))
             )}

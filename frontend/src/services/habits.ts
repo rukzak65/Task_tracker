@@ -12,6 +12,7 @@ export interface Habit {
 
 interface CreateHabitData {
   name: string;
+  frequency: string; // e.g., "daily", "weekly"
 }
 
 class HabitsService {
@@ -26,7 +27,7 @@ class HabitsService {
         headers: this.getAuthHeaders(),
       });
       return response.data;
-    } catch (error) {
+    } catch {
       throw new Error('Failed to fetch habits');
     }
   }
@@ -37,7 +38,7 @@ class HabitsService {
         headers: this.getAuthHeaders(),
       });
       return response.data;
-    } catch (error) {
+    } catch{
       throw new Error('Failed to create habit');
     }
   }
@@ -48,7 +49,7 @@ class HabitsService {
         headers: this.getAuthHeaders(),
       });
       return response.data;
-    } catch (error) {
+    } catch {
       throw new Error('Failed to update habit');
     }
   }
@@ -58,7 +59,7 @@ class HabitsService {
       await axios.delete(`${API_BASE_URL}/habits/${id}`, {
         headers: this.getAuthHeaders(),
       });
-    } catch (error) {
+    } catch {
       throw new Error('Failed to delete habit');
     }
   }
