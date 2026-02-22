@@ -24,7 +24,7 @@ class HabitsService {
 
   async getHabits(): Promise<Habit[]> {
     try {
-      const response = await axios.get(`${API_BASE_URL}/habits`, {
+      const response = await axios.get(`${API_BASE_URL}/habits/`, {
         headers: this.getAuthHeaders(),
       });
       return response.data;
@@ -35,7 +35,7 @@ class HabitsService {
 
   async createHabit(data: CreateHabitData): Promise<Habit> {
     try {
-      const response = await axios.post(`${API_BASE_URL}/habits`, data, {
+      const response = await axios.post(`${API_BASE_URL}/habits/`, data, {
         headers: this.getAuthHeaders(),
       });
       return response.data;
@@ -46,7 +46,7 @@ class HabitsService {
 
   async updateHabit(id: string, data: Partial<Habit>): Promise<Habit> {
     try {
-      const response = await axios.put(`${API_BASE_URL}/habits/${id}`, data, {
+      const response = await axios.put(`${API_BASE_URL}/habits/${id}/`, data, {
         headers: this.getAuthHeaders(),
       });
       return response.data;
@@ -57,7 +57,7 @@ class HabitsService {
 
   async deleteHabit(id: string): Promise<void> {
     try {
-      await axios.delete(`${API_BASE_URL}/habits/${id}`, {
+      await axios.delete(`${API_BASE_URL}/habits/${id}/`, {
         headers: this.getAuthHeaders(),
       });
     } catch {

@@ -60,8 +60,11 @@ def delete_habit(db: Session, habit_id: int):
     return db_habit
 
 # CRUD для HabitCompletion
-def get_completions_by_habit(db: Session, habit_id: int):
-    return db.query(models.HabitCompletion).filter(models.HabitCompletion.habit_id == habit_id).all()
+def get_completions_by_user(db: Session, user_id: int):
+    # Получить все habit_ids пользователя
+    habits = db.query(models.Habit).filter(models.Habit.user_id == user_id).all()
+    habit_ids = [h.id for h in habits]
+    return db.query(models.HabitCompletion).filter(models.HabitCompletion.habit_id.in_(habit_ids)).all()
 
 def create_completion(db: Session, completion: schemas.HabitCompletionCreate, user_id: int):
     db_completion = models.HabitCompletion(
