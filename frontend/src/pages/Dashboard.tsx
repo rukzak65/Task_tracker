@@ -1,11 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../components/Auth/AuthContextInstance';
 import HabitsService, { type Habit } from '../services/habits';
+import './Dashboard.css';
 
 const Dashboard: React.FC = () => {
   const { logout } = useAuth();
   const [newHabitNames, setNewHabitNames] = useState<string[]>(['', '', '', '', '', '', '']);
   const [habits, setHabits] = useState<Habit[]>([]);
+
+  const dayColors = [
+    { bg: '#FEF3C7', border: '#FCD34D' },  // Monday - yellow
+    { bg: '#FCE7F3', border: '#FBCFE8' },  // Tuesday - pink
+    { bg: '#E0E7FF', border: '#C7D2FE' },  // Wednesday - blue
+    { bg: '#FED7AA', border: '#FDBA74' },  // Thursday - orange
+    { bg: '#DBEAFE', border: '#BFDBFE' },  // Friday - light blue
+    { bg: '#F3E8FF', border: '#E9D5FF' },  // Saturday - purple
+    { bg: '#FCE7F3', border: '#FBCFE8' },  // Sunday - pink
+  ];
 
   useEffect(() => {
     const loadHabits = async () => {
@@ -73,39 +84,53 @@ const Dashboard: React.FC = () => {
   const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
   return (
-    <div>
-      <h1>Dashboard - Week View</h1>
-      <button onClick={logout}>Logout</button>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+    <div className="dashboard-page">
+      <div className="dashboard-header">
+        <div className="header-content">
+          <div className="logo-title">
+            <div className="checkmark-logo">✓</div>
+            <h1>Habit Tracker</h1>
+          </div>
+          <button onClick={logout} className="logout-btn">Logout</button>
+        </div>
+      </div>
+      <div className="week-grid">
         {daysOfWeek.map((day, index) => (
-          <div key={day} style={{ border: '1px solid #ccc', padding: '10px' }}>
-            <h3>{day}</h3>
-            <div style={{ margin: '10px 0' }}>
+          <div 
+            key={day} 
+            className="day-card"
+            style={{ backgroundColor: dayColors[index].bg, borderColor: dayColors[index].border }}
+          >
+            <h2 className="day-title">{day}</h2>
+            <div className="day-form">
               <input
                 type="text"
                 value={newHabitNames[index]}
                 onChange={(e) => setNewHabitNames(prev => prev.map((name, i) => i === index ? e.target.value : name))}
-                placeholder="Enter habit name"
+                placeholder="Add habit"
+                className="habit-input"
               />
-              <button onClick={() => handleAddHabit(index)}>Add Habit</button>
+              <button onClick={() => handleAddHabit(index)} className="add-btn">+</button>
             </div>
-            {habits.length === 0 ? (
-              <p>No habits yet</p>
-            ) : (
-              habits.filter(h => h.day_of_week === index).map((habit) => (
-                <div key={habit.id} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={habit.completions[weekDates[index]] || false}
-                      onChange={() => handleToggleCompletion(habit.id, weekDates[index])}
-                    />
-                    {habit.title}
-                  </label>
-                  <button onClick={() => handleDeleteHabit(habit.id)}>Delete</button>
-                </div>
-              ))
-            )}
+            <div className="habits-list">
+              {habits.filter(h => h.day_of_week === index).length === 0 ? (
+                <p className="no-habits">No habits</p>
+              ) : (
+                habits.filter(h => h.day_of_week === index).map((habit) => (
+                  <div key={habit.id} className="habit-item">
+                    <label className="habit-label">
+                      <input
+                        type="checkbox"
+                        checked={habit.completions[weekDates[index]] || false}
+                        onChange={() => handleToggleCompletion(habit.id, weekDates[index])}
+                      />
+                      <span>{habit.title}</span>
+                    </label>
+                    <button onClick={() => handleDeleteHabit(habit.id)} className="delete-btn">×</button>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         ))}
       </div>

@@ -1,0 +1,258 @@
+* {
+  box-sizing: border-box;
+}
+
+.dashboard-page {
+  min-height: 100vh;
+  background: #f9fafb;
+  padding: 32px 16px;
+}
+
+.dashboard-header {
+  margin-bottom: 36px;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.logo-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.checkmark-logo {
+  width: 48px;
+  height: 48px;
+  background: #4b5563;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #fff;
+  font-weight: bold;
+}
+
+.logo-title h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  color: #1f2937;
+  letter-spacing: -0.5px;
+}
+
+.logout-btn {
+  padding: 8px 16px;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.logout-btn:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+/* Week Grid */
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 16px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Для контейнера с тремя нижними карточками */
+.bottom-row-container {
+  display: flex;
+  justify-content: center;
+  /* Центрирует карточки по горизонтали */
+  gap: 20px;
+  /* Расстояние между карточками */
+}
+
+/* Day Cards */
+.day-card {
+  background: #fff;
+  border: 2px solid;
+  border-radius: 12px;
+  padding: 16px;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s;
+}
+
+/* Верхние 4 дня */
+.day-card:nth-child(1) { grid-column: 1 / 3; }
+.day-card:nth-child(2) { grid-column: 3 / 5; }
+.day-card:nth-child(3) { grid-column: 5 / 7; }
+.day-card:nth-child(4) { grid-column: 7 / 9; }
+
+/* Нижние 3 дня - центрированы */
+.day-card:nth-child(5) { grid-column: 2 / 4; grid-row: 2; }
+.day-card:nth-child(6) { grid-column: 4 / 6; grid-row: 2; }
+.day-card:nth-child(7) { grid-column: 6 / 8; grid-row: 2; }
+
+.day-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.day-title {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.day-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.habit-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.habit-input:focus {
+  outline: none;
+  border-color: #6b7280;
+}
+
+.habit-input::placeholder {
+  color: #9ca3af;
+}
+
+.add-btn {
+  width: 34px;
+  height: 34px;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #374151;
+}
+
+.add-btn:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+/* Habits List */
+.habits-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.no-habits {
+  color: #9ca3af;
+  font-size: 13px;
+  margin: 0;
+  text-align: center;
+  padding: 12px 0;
+}
+
+.habit-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.02);
+  transition: background 0.2s;
+}
+
+.habit-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.habit-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  flex: 1;
+  margin: 0;
+  font-size: 14px;
+  color: #1f2937;
+}
+
+.habit-label input[type="checkbox"] {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+  accent-color: #4b5563;
+}
+
+.habit-label span {
+  word-break: break-word;
+}
+
+.delete-btn {
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #6b7280;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-btn:hover {
+  color: #ef4444;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .week-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .week-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .logo-title h1 {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .week-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .dashboard-page {
+    padding: 16px 12px;
+  }
+}
