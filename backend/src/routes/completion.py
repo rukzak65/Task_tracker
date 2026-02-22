@@ -20,6 +20,11 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
         raise HTTPException(status_code=401, detail="User not found")
     return user
 
+@router.get("/", response_model=list[schemas.HabitCompletion])
+def read_all_completions(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    return crud.get_completions_by_user(db, current_user.id)
+
+
 @router.get("/{habit_id}", response_model=list[schemas.HabitCompletion])
 def read_completions(habit_id: int, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
     habit = crud.get_habit(db, habit_id)

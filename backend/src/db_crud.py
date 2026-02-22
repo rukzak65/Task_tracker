@@ -66,6 +66,9 @@ def get_completions_by_user(db: Session, user_id: int):
     habit_ids = [h.id for h in habits]
     return db.query(models.HabitCompletion).filter(models.HabitCompletion.habit_id.in_(habit_ids)).all()
 
+def get_completions_by_habit(db: Session, habit_id: int):
+    return db.query(models.HabitCompletion).filter(models.HabitCompletion.habit_id == habit_id).all()
+
 def create_completion(db: Session, completion: schemas.HabitCompletionCreate, user_id: int):
     db_completion = models.HabitCompletion(
         habit_id=completion.habit_id,

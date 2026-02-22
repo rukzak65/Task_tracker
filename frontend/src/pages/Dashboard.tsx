@@ -3,10 +3,28 @@ import { useAuth } from '../components/Auth/AuthContextInstance';
 import HabitsService, { type Habit } from '../services/habits';
 import './Dashboard.css';
 
+type CompletionMap = Record<string, number>;
+
+const getCompletionKey = (habitId: string | number, dayOfWeek: number): string => `${habitId}-${dayOfWeek}`;
+const COMPLETIONS_CACHE_KEY = 'habitCompletionByKey';
+
+const readCachedCompletions = (): CompletionMap => {
+  try {
+    const cached = localStorage.getItem(COMPLETIONS_CACHE_KEY);
+    if (!cached) return {};
+    const parsed = JSON.parse(cached) as CompletionMap;
+    return parsed ?? {};
+  } catch {
+    return {};
+  }
+};
+
 const Dashboard: React.FC = () => {
   const { logout } = useAuth();
   const [newHabitNames, setNewHabitNames] = useState<string[]>(['', '', '', '', '', '', '']);
   const [habits, setHabits] = useState<Habit[]>([]);
+  const [completionByKey, setCompletionByKey] = useState<CompletionMap>(readCachedCompletions);
+  const [pendingCompletionKeys, setPendingCompletionKeys] = useState<Record<string, boolean>>({});
 
   const dayColors = [
     { bg: '#FEF3C7', border: '#FCD34D' },  // Monday - yellow
@@ -19,28 +37,84 @@ const Dashboard: React.FC = () => {
   ];
 
   useEffect(() => {
-    const loadHabits = async () => {
+    const loadDashboardData = async () => {
       try {
-        const fetchedHabits = await HabitsService.getHabits();
+        const [fetchedHabits, fetchedCompletions] = await Promise.all([
+          HabitsService.getHabits(),
+          HabitsService.getAllCompletions(),
+        ]);
+
         setHabits(fetchedHabits.map(h => ({ ...h, completions: h.completions || {} })));
+
+        const completionMap = fetchedCompletions.reduce<CompletionMap>((acc, completion) => {
+          acc[getCompletionKey(completion.habit_id, completion.day_of_week)] = completion.id;
+          return acc;
+        }, {});
+
+        setCompletionByKey(completionMap);
       } catch (error) {
-        console.error('Failed to load habits:', error);
+        console.error('Failed to load dashboard data, using cached completions:', error);
       }
     };
-    loadHabits();
+    loadDashboardData();
   }, []);
 
-  const handleToggleCompletion = async (habitId: string, date: string) => {
-    const habit = habits.find(h => h.id === habitId);
-    if (!habit) return;
+  useEffect(() => {
+    localStorage.setItem(COMPLETIONS_CACHE_KEY, JSON.stringify(completionByKey));
+  }, [completionByKey]);
 
-    const newCompletions = { ...habit.completions, [date]: !habit.completions[date] };
-    const updatedHabit = { ...habit, completions: newCompletions };
+  const handleToggleCompletion = async (habitId: string | number, dayOfWeek: number) => {
+    const completionKey = getCompletionKey(habitId, dayOfWeek);
+    if (pendingCompletionKeys[completionKey]) return;
 
-    // Optimistic update
-    setHabits(habits.map(h => h.id === habitId ? updatedHabit : h));
+    const existingCompletionId = completionByKey[completionKey];
+    setPendingCompletionKeys(prev => ({ ...prev, [completionKey]: true }));
 
-    // Note: Completions are local only, no API update needed
+    if (existingCompletionId) {
+      setCompletionByKey(prev => {
+        const updated = { ...prev };
+        delete updated[completionKey];
+        return updated;
+      });
+
+      try {
+        await HabitsService.deleteCompletion(existingCompletionId);
+      } catch (error) {
+        setCompletionByKey(prev => ({ ...prev, [completionKey]: existingCompletionId }));
+        console.error('Failed to delete completion:', error);
+      } finally {
+        setPendingCompletionKeys(prev => {
+          const updated = { ...prev };
+          delete updated[completionKey];
+          return updated;
+        });
+      }
+      return;
+    }
+
+    setCompletionByKey(prev => ({ ...prev, [completionKey]: -1 }));
+
+    try {
+      const createdCompletion = await HabitsService.createCompletion({
+        habit_id: Number(habitId),
+        day_of_week: dayOfWeek,
+      });
+
+      setCompletionByKey(prev => ({ ...prev, [completionKey]: createdCompletion.id }));
+    } catch (error) {
+      setCompletionByKey(prev => {
+        const updated = { ...prev };
+        delete updated[completionKey];
+        return updated;
+      });
+      console.error('Failed to create completion:', error);
+    } finally {
+      setPendingCompletionKeys(prev => {
+        const updated = { ...prev };
+        delete updated[completionKey];
+        return updated;
+      });
+    }
   };
 
   const handleAddHabit = async (dayIndex: number) => {
@@ -55,32 +129,25 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const handleDeleteHabit = async (habitId: string) => {
+  const handleDeleteHabit = async (habitId: string | number) => {
     if (window.confirm('Are you sure you want to delete this habit?')) {
       try {
         await HabitsService.deleteHabit(habitId);
         setHabits(habits.filter(h => h.id !== habitId));
+        setCompletionByKey(prev => {
+          const updated = { ...prev };
+          Object.keys(updated).forEach((key) => {
+            if (key.startsWith(`${habitId}-`)) {
+              delete updated[key];
+            }
+          });
+          return updated;
+        });
       } catch (error) {
         console.error('Failed to delete habit:', error);
       }
     }
   };
-
-  // Get current week's dates (Monday to Sunday)
-  const getWeekDates = () => {
-    const today = new Date();
-    const monday = new Date(today);
-    monday.setDate(today.getDate() - today.getDay() + 1);
-    const dates = [];
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(monday);
-      date.setDate(monday.getDate() + i);
-      dates.push(date.toISOString().split('T')[0]); // YYYY-MM-DD
-    }
-    return dates;
-  };
-
-  const weekDates = getWeekDates();
   const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
   return (
@@ -121,8 +188,9 @@ const Dashboard: React.FC = () => {
                     <label className="habit-label">
                       <input
                         type="checkbox"
-                        checked={habit.completions[weekDates[index]] || false}
-                        onChange={() => handleToggleCompletion(habit.id, weekDates[index])}
+                        checked={Boolean(completionByKey[getCompletionKey(habit.id, index)])}
+                        disabled={Boolean(pendingCompletionKeys[getCompletionKey(habit.id, index)])}
+                        onChange={() => handleToggleCompletion(habit.id, index)}
                       />
                       <span>{habit.title}</span>
                     </label>

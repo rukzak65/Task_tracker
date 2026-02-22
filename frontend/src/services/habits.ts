@@ -4,16 +4,27 @@ import AuthService from './auth';
 const API_BASE_URL = 'http://127.0.0.1:8000';
 
 export interface Habit {
-  id: string;
+  id: string | number;
   title: string;
   day_of_week: number;
-  userId: string;
+  userId: string | number;
   completions: { [date: string]: boolean }; // date in YYYY-MM-DD format
 }
 
 interface CreateHabitData {
   title: string;
   day_of_week: number; // 0-6 for Monday to Sunday
+}
+
+export interface HabitCompletion {
+  id: number;
+  habit_id: number;
+  day_of_week: number;
+}
+
+interface CreateCompletionData {
+  habit_id: number;
+  day_of_week: number;
 }
 
 class HabitsService {
@@ -55,13 +66,45 @@ class HabitsService {
     }
   }
 
-  async deleteHabit(id: string): Promise<void> {
+  async deleteHabit(id: string | number): Promise<void> {
     try {
       await axios.delete(`${API_BASE_URL}/habits/${id}/`, {
         headers: this.getAuthHeaders(),
       });
     } catch {
       throw new Error('Failed to delete habit');
+    }
+  }
+
+  async getAllCompletions(): Promise<HabitCompletion[]> {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/completions/`, {
+        headers: this.getAuthHeaders(),
+      });
+      return response.data;
+    } catch {
+      throw new Error('Failed to fetch completions');
+    }
+  }
+
+  async createCompletion(data: CreateCompletionData): Promise<HabitCompletion> {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/completions/`, data, {
+        headers: this.getAuthHeaders(),
+      });
+      return response.data;
+    } catch {
+      throw new Error('Failed to create completion');
+    }
+  }
+
+  async deleteCompletion(id: number): Promise<void> {
+    try {
+      await axios.delete(`${API_BASE_URL}/completions/${id}`, {
+        headers: this.getAuthHeaders(),
+      });
+    } catch {
+      throw new Error('Failed to delete completion');
     }
   }
 }
